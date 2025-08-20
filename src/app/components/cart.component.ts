@@ -28,8 +28,8 @@ import { ProductService } from '../services/product.service';
         <tbody>
           <tr *ngFor="let item of productService.cart()">
             <td class="product-cell">
-              <img [src]="item.product.imageUrl" alt="{{item.product.name}}" />
-              <span>{{item.product.name}}</span>
+              <img [src]="item.product.image" alt="{{item.product.title}}" />
+              <span>{{item.product.title}}</span>
             </td>
             <td>{{ item.quantity }}</td>
             <td>\${{ item.product.price | number:'1.2-2' }}</td>

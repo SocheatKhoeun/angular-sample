@@ -9,12 +9,14 @@ import { ProductService } from '../services/product.service';
   imports: [CommonModule],
   template: `
     <div *ngIf="product" class="details-container">
-      <img [src]="product.imageUrl" alt="{{product.name}}" />
+      <img [src]="product.image" alt="{{product.title}}" />
 
       <div class="info">
-        <h2>{{product.name}}</h2>
+        <h2>{{product.title}}</h2>
         <p class="price">Price: \${{product.price}}</p>
-        <p class="stock">Stock: {{ product.qty }}</p>
+        <p class="category">Category: {{ product.category }}</p>
+        <p class="desc">{{ product.description }}</p>
+        <p class="rating">Rating: {{ product.rating?.rate }} ({{ product.rating?.count }} reviews)</p>
 
         <div class="buttons">
           <button class="add-btn" (click)="addToCart()">Add to Cart</button>
@@ -58,7 +60,7 @@ import { ProductService } from '../services/product.service';
       color: #222;
     }
 
-    .info .price, .info .stock {
+    .info .price, .info .category, .info .desc, .info .rating {
       font-size: 1.1rem;
       margin-bottom: 10px;
       color: #555;

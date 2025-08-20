@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ProductService } from '../services/product.service';
 
 @Component({
   standalone: true,
   selector: 'app-checkout',
-  imports: [CommonModule, DecimalPipe],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="checkout-container">
       <h2 class="checkout-title">Checkout</h2>
@@ -29,8 +30,8 @@ import { ProductService } from '../services/product.service';
           <tbody>
             <tr *ngFor="let item of productService.cart()">
               <td class="product-cell">
-                <img [src]="item.product.imageUrl" alt="{{item.product.name}}" />
-                <span>{{ item.product.name }}</span>
+                <img [src]="item.product.image" alt="{{item.product.title}}" />
+                <span>{{ item.product.title }}</span>
               </td>
               <td>{{ item.quantity }}</td>
               <td>\${{ item.product.price | number:'1.2-2' }}</td>
@@ -39,10 +40,33 @@ import { ProductService } from '../services/product.service';
           </tbody>
         </table>
 
-        <div class="summary">
+        <div class="summary" *ngIf="!showForm">
           <span class="total">Total: \${{ total() | number:'1.2-2' }}</span>
-          <button class="btn complete-btn" (click)="completeCheckout()">Complete Order</button>
+          <button class="btn complete-btn" (click)="showForm = true">Complete Order</button>
         </div>
+
+        <!-- Checkout Form -->
+        <form *ngIf="showForm" class="checkout-form" (ngSubmit)="placeOrder()">
+          <h3>Enter your information</h3>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" [(ngModel)]="customer.name" name="name" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="customer.email" name="email" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="customer.address" name="address" required class="form-input" />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn complete-btn" [disabled]="!customer.name || !customer.email || !customer.address">
+              Place Order
+            </button>
+            <button type="button" class="btn cancel-btn" (click)="showForm = false">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   `,
@@ -146,19 +170,81 @@ import { ProductService } from '../services/product.service';
     .complete-btn:hover {
       background-color: #38a169;
     }
+
+    .checkout-form {
+      margin-top: 30px;
+      padding: 24px;
+      background: #f8fafc;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(102,126,234,0.07);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .checkout-form h3 {
+      margin-bottom: 18px;
+      font-size: 1.3rem;
+      color: #333;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .form-group label {
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #555;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      background: #fff;
+      transition: border 0.2s;
+    }
+    .form-input:focus {
+      border-color: #667eea;
+      outline: none;
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .cancel-btn {
+      background-color: #f56565;
+      color: #fff;
+    }
+    .cancel-btn:hover {
+      background-color: #c53030;
+    }
   `]
 })
 export class CheckoutComponent {
+  showForm = false;
+  customer = { name: '', email: '', address: '' };
+
   constructor(public productService: ProductService, private router: Router) {}
 
   total() {
     return this.productService.cart().reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   }
 
-  completeCheckout() {
-    this.productService.clearCart();
-    alert('Order completed!');
-    this.router.navigate(['/']);
+  placeOrder() {
+    if (this.customer.name && this.customer.email && this.customer.address) {
+      this.productService.clearCart();
+      alert(
+        `Order placed successfully!\n\nName: ${this.customer.name}\nEmail: ${this.customer.email}\nAddress: ${this.customer.address}`
+      );
+      this.showForm = false;
+      this.router.navigate(['/']);
+    }
   }
 
   goToProducts() {
